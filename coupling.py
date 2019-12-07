@@ -8,41 +8,19 @@ Original file is located at
 
 ### Setup Cuda/ Numba Environment. Set Runtime to GPU-runtime
 """
-
-!apt-get install nvidia-cuda-toolkit
-!apt
-!pip3 install numba
-
-#import os
-#os.environ['NUMBAPRO_LIBDEVICE'] = "/usr/lib/nvidia-cuda-toolkit/libdevice"
-#os.environ['NUMBAPRO_NVVM'] = "/usr/lib/x86_64-linux-gnu/libnvvm.so"
-
+import argparse
 from numba import cuda
 import numpy as np
 
 print(cuda.gpus)
-
-def cpu_update_phi(phi, sines, energies):
-    for n in range(Nx):
-        for m in range(Nx):
-            for l in range(Nx):
-              result = 0.
-              if (n < phi.shape[0]) and (m < phi.shape[1]) and (l < phi.shape[2]):
-                  prefactor = prefactor_numerator / (energies[n] + energies[m] + energies[l] + eB)
-                  for np in range(Nx):
-                      for mp in range(np + 1):
-                          for lp in range(mp + 1):
-                              summand = 0.
-                              for x in range(Nx):
-                                  summand += ((sines[n][x] * sines[np][x] * sines[m][x] * sines[mp][x] * sines[l][x] * sines[lp][x]))
-                              result = result + (weight(np, mp, lp) * phi[np, mp, lp] * summand)
-                  phi[n][m][l] = prefactor * result
-
-Nx = 20
-betaeb = 1.5
-N_init = 10
+parser = argparse.ArgumentParser(description='Give betaeb')
+parser.add_argument('betaeb', type=float, help='betaeb for the system')
+args = parser.parse_args()
+betaeb = args.betaeb
+Nx = 80 
+Nx_init = 80
 beta = 18
-eB = betaeb / (((Nx / N_init) ** 2) * beta)
+eB = betaeb / (((Nx / Nx_init) ** 2) * beta)
 
 def initialize_sines(sines):
   for n in range(1, Nx + 1):
@@ -151,7 +129,7 @@ def test_g(g):
     norm1 = norm2
     normalize_phi(phi)
     threadsperblock = (4, 4, 16)
-    blockspergrid = (40 ,40, 40)
+    blockspergrid = (80 ,80, 80)
     start = time.time()
     cu_update_phi[blockspergrid, threadsperblock](phi, sines, energies, phi2, prefactor_numerator)
     norm2 = get_renormalization(phi2)
@@ -171,4 +149,7 @@ g2 = -4.0
 from scipy import optimize
 sol = optimize.root_scalar(test_g, bracket=[g2, g1], method='brenth', xtol=0.001)
 print(sol.root, sol.iterations, sol.function_calls)
+with open("Output.txt", "a+") as text_file:
+    text_file.write(f'g = {sol.root} for Nx: {Nx} Nx_init:{Nx_init} betaeb: {betaeb} beta: {beta}' + "\n")
+
 
