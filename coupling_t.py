@@ -14,7 +14,7 @@ L = 81
 Nx_list = [78, 79, 80, 81, 82]
 
 for Nx in Nx_list: 
-  print('Starting Nx' + Nx)
+  print('Starting Nx' + str(Nx))
 # l = 1 only for Nx = 80
   l = L/(Nx+1)
 
@@ -156,3 +156,5 @@ for Nx in Nx_list:
   from scipy import optimize
   sol = optimize.root_scalar(test_g, bracket=[g2, g1], method='brenth', xtol=0.001)
   print(sol.root, sol.iterations, sol.function_calls)
+  with open("Output.txt", "a+") as text_file:
+          text_file.write(f'{sol.root} {Nx} {betaeb} {beta}' + "\n")
