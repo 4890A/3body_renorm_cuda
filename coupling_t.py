@@ -35,7 +35,7 @@ for Nx in Nx_list:
 
   def initialize_energies(energies):
     for k in range(1, Nx + 1):
-      energies[k-1] = -1 * np.cos(float(k) * np.pi / L) + np.cos(np.pi / L)
+      energies[k-1] = -1 * np.cos(float(k) * np.pi / (Nx + 1)) + np.cos(np.pi / (Nx + 1))
     energies = energies*2*t
 
   def initialize_phi(phi):
@@ -156,5 +156,5 @@ for Nx in Nx_list:
   from scipy import optimize
   sol = optimize.root_scalar(test_g, bracket=[g2, g1], method='brenth', xtol=0.001)
   print(sol.root, sol.iterations, sol.function_calls)
-  with open("Output.txt", "a+") as text_file:
+  with open("Output2.txt", "a+") as text_file:
           text_file.write(f'{sol.root} {Nx} {betaeb} {beta}' + "\n")
